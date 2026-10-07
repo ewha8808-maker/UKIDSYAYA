@@ -1,0 +1,409 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>폴짝폴짝 흉내말 놀이</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: 한 화면 놀이마당. 위쪽 3분의 2는 흉내말 무대, 맨 아래 한 줄은 아이 손이 닿는 그림 버튼. */
+:root{
+  --paper:#FFF1CC;
+  --ink:#26324D;
+  --sky:#CFEDEE;
+  --hill:#A8DDB4;
+  --yard:#F2BE6B;
+  --card:#FFFFFF;
+  --sun:#FFD84D;
+  --accent:#D93A4A;
+  --on-accent:#FFFFFF;
+  --shade:rgba(38,50,77,.2);
+  --display:"Jua","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --text:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --u:min(1vw,1.78vh);              /* 16:9 화면에서 1vw와 같은 기준 단위 */
+  --line:max(3px,calc(var(--u)*.3));
+  color-scheme:light;
+}
+html{height:100%;box-sizing:border-box}
+body{
+  height:100%;box-sizing:border-box;overflow:hidden;
+  display:flex;flex-direction:column;gap:calc(var(--u)*.9);
+  padding-block:calc(var(--u)*.9);
+  padding-inline:max(16px,calc(var(--u)*1.4));
+  background:var(--paper);color:var(--ink);font-family:var(--text);
+  -webkit-user-select:none;user-select:none;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* 위쪽 줄: 이름과 선생님용 도구 */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:calc(var(--u)*.8) calc(var(--u)*1.6);min-width:0}
+.top h1{margin:0;font-family:var(--display);font-weight:400;font-size:max(18px,calc(var(--u)*2.3));line-height:1.1}
+.hint{margin:0;flex:1;min-width:0;font-size:max(14px,calc(var(--u)*1.5));font-weight:700}
+.tools{display:flex;gap:calc(var(--u)*.7);margin-left:auto}
+.tool{
+  font:inherit;font-weight:700;font-size:max(14px,calc(var(--u)*1.4));color:var(--ink);
+  background:var(--card);border:max(2px,calc(var(--u)*.2)) solid var(--ink);border-radius:999px;
+  min-height:max(40px,calc(var(--u)*3.4));padding:0 max(14px,calc(var(--u)*1.4));cursor:pointer;
+}
+.tool[aria-pressed="false"]{background:var(--paper)}
+.tool:disabled{opacity:.6;cursor:default}
+
+/* 무대 */
+.stage{
+  --sh:60vh;
+  position:relative;flex:1;min-height:0;overflow:hidden;
+  background:var(--sky);border:var(--line) solid var(--ink);border-radius:calc(var(--u)*3);
+}
+.sun{position:absolute;right:-2%;top:-7%;width:min(calc(var(--sh)*.26),22vw);aspect-ratio:1;border-radius:50%;background:var(--sun)}
+.hill{position:absolute;bottom:10%;border-radius:50%;background:var(--hill)}
+.hill.a{left:-12%;width:62%;height:36%}
+.hill.b{right:-16%;width:70%;height:28%}
+.yard{position:absolute;left:0;right:0;bottom:0;height:16%;background:var(--yard);border-top:var(--line) solid var(--ink)}
+.word{
+  position:absolute;left:0;right:0;top:7%;z-index:1;margin:0;text-align:center;white-space:nowrap;
+  font-family:var(--display);font-size:min(calc(var(--sh)*.16),17vw);line-height:1.1;
+}
+.word span{display:inline-block}
+.caption{
+  position:absolute;left:0;right:0;top:calc(7% + var(--sh)*.19);z-index:1;margin:0;padding-inline:16px;
+  text-align:center;font-family:var(--display);font-size:max(16px,min(calc(var(--sh)*.055),5.4vw));line-height:1.2;
+}
+.shadow{position:absolute;left:0;bottom:8%;z-index:2;border-radius:50%;background:var(--shade);will-change:transform}
+.actor{position:absolute;left:0;bottom:9%;z-index:3;will-change:transform}
+.actor svg{display:block;width:100%;height:100%;overflow:visible}
+
+/* 아래쪽 버튼 줄 */
+.dock{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:calc(var(--u)*.9);padding-bottom:calc(var(--u)*.6)}
+.btn{
+  min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*.2);
+  padding:calc(var(--u)*.7) calc(var(--u)*.3);
+  font-family:var(--display);font-size:max(15px,calc(var(--u)*1.9));line-height:1.15;color:var(--ink);
+  background:var(--card);border:var(--line) solid var(--ink);border-radius:calc(var(--u)*2.2);
+  box-shadow:0 calc(var(--u)*.5) 0 var(--ink);cursor:pointer;word-break:keep-all;text-align:center;
+}
+.btn svg{width:max(42px,calc(var(--u)*7));height:max(42px,calc(var(--u)*7));flex:none}
+.btn:active{transform:translateY(calc(var(--u)*.35));box-shadow:0 calc(var(--u)*.15) 0 var(--ink)}
+.btn[aria-pressed="true"]{background:var(--sun)}
+.btn.follow{background:var(--accent);color:var(--on-accent)}
+.btn.follow svg{width:max(34px,calc(var(--u)*4.6));height:max(34px,calc(var(--u)*4.6))}
+.btn.follow[aria-pressed="true"]{background:var(--ink)}
+.btn:focus-visible,.tool:focus-visible{outline:var(--line) solid var(--accent);outline-offset:3px}
+
+@media (max-width:700px){
+  .hint{display:none}
+  .dock{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .btn{padding:6px 2px}
+  .btn.follow{grid-column:1/-1;flex-direction:row;gap:10px;min-height:52px}
+}
+
+/* 글자도 그 말처럼 움직인다 */
+.word[data-move="frog"] span{animation:w-hop 1.15s ease-in-out infinite;animation-delay:calc(var(--i)*.09s)}
+.word[data-move="rabbit"] span{animation:w-skip .52s ease-out infinite;animation-delay:calc(var(--i)*.06s)}
+.word[data-move="turtle"] span{animation:w-crawl 3.6s ease-in-out infinite;animation-delay:calc(var(--i)*.3s)}
+.word[data-move="cat"] span{animation:w-sneak 1.3s ease-in-out infinite;animation-delay:calc(var(--i)*.16s)}
+.word[data-move="penguin"] span{animation:w-waddle 1s ease-in-out infinite}
+.word[data-move="penguin"] span:nth-child(even){animation-delay:-.5s}
+.word[data-move="ball"] span{animation:w-roll 1.8s ease-in-out infinite;animation-delay:calc(var(--i)*.2s)}
+.word[data-move="top"] span{animation:w-spin 1.5s ease-in-out infinite}
+.word[data-move="tree"] span{animation:w-sway 2.6s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes w-hop{0%,25%,100%{transform:none}55%{transform:translateY(-34%)}}
+@keyframes w-skip{0%,100%{transform:none}45%{transform:translateY(-16%)}}
+@keyframes w-crawl{0%,100%{transform:translateX(-5%)}50%{transform:translateX(5%)}}
+@keyframes w-sneak{0%,34%,100%{transform:scale(.92)}16%{transform:translateY(-8%) scale(.92)}}
+@keyframes w-waddle{0%,100%{transform:rotate(-11deg)}50%{transform:rotate(11deg)}}
+@keyframes w-roll{0%,20%{transform:none}80%,100%{transform:rotate(360deg)}}
+@keyframes w-spin{0%{transform:none}55%,100%{transform:rotate(360deg)}}
+@keyframes w-sway{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
+.actor .bars{animation:bars .28s linear infinite}
+@keyframes bars{to{transform:translateX(-48px)}}
+.stage.still .word span,.stage.still .actor .bars{animation:none}
+@media (prefers-reduced-motion:reduce){.word span{animation:none!important}}
+</style>
+
+<header class="top">
+  <h1>폴짝폴짝 흉내말 놀이</h1>
+  <p class="hint">아래 그림을 누르면 친구가 나와요</p>
+  <div class="tools">
+    <button class="tool" id="sound" type="button" aria-pressed="true">소리 켜짐</button>
+    <button class="tool" id="full" type="button">전체 화면</button>
+  </div>
+</header>
+
+<main class="stage" id="stage">
+  <div class="sun"></div>
+  <div class="hill a"></div>
+  <div class="hill b"></div>
+  <div class="yard"></div>
+  <p class="word" id="word" role="img"></p>
+  <p class="caption" id="caption" aria-live="polite"></p>
+  <div class="shadow" id="shadow"></div>
+  <div class="actor" id="actor"></div>
+</main>
+
+<nav class="dock" id="dock" aria-label="흉내말 고르기"></nav>
+
+<script>
+(function(){
+  var K='#26324D', uid=0;
+  function art(inner){
+    return '<svg viewBox="0 0 120 120" aria-hidden="true" focusable="false"><g stroke="'+K+'" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">'+inner+'</g></svg>';
+  }
+  var TOP_BODY='M14 44 Q14 32 60 32 Q106 32 106 44 L106 54 Q106 62 94 72 L66 106 Q60 114 54 106 L26 72 Q14 62 14 54 Z';
+
+  var ART={
+    frog:function(){return art(
+      '<ellipse cx="24" cy="108" rx="17" ry="8" fill="#3F9A45"/><ellipse cx="96" cy="108" rx="17" ry="8" fill="#3F9A45"/>'+
+      '<ellipse cx="60" cy="86" rx="38" ry="26" fill="#62C05A"/><ellipse cx="60" cy="94" rx="21" ry="15" fill="#E4F5B5" stroke="none"/>'+
+      '<circle cx="40" cy="40" r="16" fill="#62C05A"/><circle cx="80" cy="40" r="16" fill="#62C05A"/>'+
+      '<ellipse cx="60" cy="58" rx="38" ry="23" fill="#62C05A"/>'+
+      '<circle cx="40" cy="38" r="9" fill="#fff"/><circle cx="42" cy="39" r="4" fill="'+K+'" stroke="none"/>'+
+      '<circle cx="80" cy="38" r="9" fill="#fff"/><circle cx="82" cy="39" r="4" fill="'+K+'" stroke="none"/>'+
+      '<circle cx="30" cy="62" r="5" fill="#F7A6A0" stroke="none"/><circle cx="90" cy="62" r="5" fill="#F7A6A0" stroke="none"/>'+
+      '<path d="M44 62 Q60 74 76 62" fill="none"/>');},
+    rabbit:function(){return art(
+      '<ellipse cx="46" cy="26" rx="10" ry="23" fill="#fff"/><ellipse cx="46" cy="28" rx="4" ry="14" fill="#F7A6A0" stroke="none"/>'+
+      '<ellipse cx="74" cy="26" rx="10" ry="23" fill="#fff"/><ellipse cx="74" cy="28" rx="4" ry="14" fill="#F7A6A0" stroke="none"/>'+
+      '<ellipse cx="44" cy="110" rx="15" ry="7" fill="#fff"/><ellipse cx="76" cy="110" rx="15" ry="7" fill="#fff"/>'+
+      '<ellipse cx="60" cy="92" rx="25" ry="20" fill="#fff"/><circle cx="60" cy="60" r="27" fill="#fff"/>'+
+      '<circle cx="50" cy="56" r="4" fill="'+K+'" stroke="none"/><circle cx="70" cy="56" r="4" fill="'+K+'" stroke="none"/>'+
+      '<circle cx="40" cy="67" r="5" fill="#F7A6A0" stroke="none"/><circle cx="80" cy="67" r="5" fill="#F7A6A0" stroke="none"/>'+
+      '<ellipse cx="60" cy="65" rx="4" ry="3" fill="#E8707A" stroke="none"/>'+
+      '<path d="M60 68 Q56 74 52 71 M60 68 Q64 74 68 71" fill="none" stroke-width="3"/>');},
+    turtle:function(){return art(
+      '<path d="M14 90 L3 96 L16 98 Z" fill="#9AD67A"/>'+
+      '<rect x="22" y="88" width="17" height="24" rx="8" fill="#9AD67A"/><rect x="62" y="88" width="17" height="24" rx="8" fill="#9AD67A"/>'+
+      '<circle cx="100" cy="72" r="15" fill="#9AD67A"/>'+
+      '<path d="M10 94 Q10 42 52 42 Q94 42 94 94 Z" fill="#3FA66B"/>'+
+      '<circle cx="34" cy="76" r="8" fill="#2C8554" stroke="none"/><circle cx="54" cy="60" r="9" fill="#2C8554" stroke="none"/><circle cx="74" cy="76" r="8" fill="#2C8554" stroke="none"/>'+
+      '<circle cx="105" cy="68" r="3.5" fill="'+K+'" stroke="none"/><path d="M100 79 Q106 82 111 77" fill="none" stroke-width="3"/>');},
+    cat:function(){return art(
+      '<path d="M24 82 Q8 76 14 50" fill="none" stroke-width="15"/><path d="M24 82 Q8 76 14 50" fill="none" stroke="#F59B3A" stroke-width="8"/>'+
+      '<rect x="26" y="90" width="11" height="24" rx="5" fill="#F59B3A"/><rect x="40" y="90" width="11" height="24" rx="5" fill="#F59B3A"/>'+
+      '<rect x="64" y="90" width="11" height="24" rx="5" fill="#F59B3A"/><rect x="78" y="90" width="11" height="24" rx="5" fill="#F59B3A"/>'+
+      '<ellipse cx="54" cy="82" rx="36" ry="18" fill="#F59B3A"/>'+
+      '<path d="M40 68 L43 80 M52 66 L53 78" fill="none" stroke="#C96F1C" stroke-width="4"/>'+
+      '<path d="M74 52 L77 30 L90 46 Z" fill="#F59B3A"/><path d="M96 46 L108 30 L110 54 Z" fill="#F59B3A"/>'+
+      '<circle cx="92" cy="64" r="21" fill="#F59B3A"/>'+
+      '<circle cx="86" cy="62" r="3.5" fill="'+K+'" stroke="none"/><circle cx="100" cy="62" r="3.5" fill="'+K+'" stroke="none"/>'+
+      '<path d="M90 68 L96 68 L93 72 Z" fill="#E8707A" stroke="none"/>'+
+      '<path d="M93 72 Q89 78 86 75 M93 72 Q97 78 100 75" fill="none" stroke-width="3"/>');},
+    penguin:function(){return art(
+      '<ellipse cx="44" cy="111" rx="13" ry="6" fill="#F59B3A"/><ellipse cx="76" cy="111" rx="13" ry="6" fill="#F59B3A"/>'+
+      '<ellipse cx="24" cy="72" rx="9" ry="22" fill="#34425E" transform="rotate(14 24 72)"/><ellipse cx="96" cy="72" rx="9" ry="22" fill="#34425E" transform="rotate(-14 96 72)"/>'+
+      '<ellipse cx="60" cy="62" rx="34" ry="48" fill="#34425E"/><ellipse cx="60" cy="76" rx="23" ry="30" fill="#fff" stroke="none"/>'+
+      '<circle cx="49" cy="38" r="7" fill="#fff" stroke="none"/><circle cx="50" cy="39" r="3.5" fill="'+K+'" stroke="none"/>'+
+      '<circle cx="71" cy="38" r="7" fill="#fff" stroke="none"/><circle cx="70" cy="39" r="3.5" fill="'+K+'" stroke="none"/>'+
+      '<path d="M51 48 L69 48 L60 60 Z" fill="#F59B3A"/>');},
+    ball:function(){return art(
+      '<circle cx="60" cy="60" r="56" fill="#fff"/>'+
+      '<path d="M60 60 L60 4 A56 56 0 0 1 108.5 32 Z" fill="#D93A4A" stroke="none"/>'+
+      '<path d="M60 60 L108.5 88 A56 56 0 0 1 60 116 Z" fill="#FFD84D" stroke="none"/>'+
+      '<path d="M60 60 L11.5 88 A56 56 0 0 1 11.5 32 Z" fill="#3D8FD1" stroke="none"/>'+
+      '<circle cx="60" cy="60" r="56" fill="none"/><circle cx="60" cy="60" r="9" fill="#fff"/>');},
+    top:function(){
+      var id='topclip'+(++uid), bars='';
+      for(var i=0;i<5;i++) bars+='<rect x="'+(-34+48*i)+'" y="20" width="22" height="100" fill="#D93A4A"/>';
+      return art(
+      '<defs><clipPath id="'+id+'"><path d="'+TOP_BODY+'"/></clipPath></defs>'+
+      '<rect x="53" y="8" width="14" height="28" rx="6" fill="#8A5A3C"/>'+
+      '<path d="'+TOP_BODY+'" fill="#FFD84D"/>'+
+      '<g clip-path="url(#'+id+')" stroke="none"><g class="bars">'+bars+'</g><rect x="0" y="50" width="120" height="8" fill="#3D8FD1"/></g>'+
+      '<path d="'+TOP_BODY+'" fill="none"/>');},
+    tree:function(){return art(
+      '<rect x="50" y="66" width="20" height="50" rx="6" fill="#A8683A"/>'+
+      '<circle cx="38" cy="54" r="26" fill="#57B36A"/><circle cx="82" cy="54" r="26" fill="#57B36A"/><circle cx="60" cy="34" r="30" fill="#57B36A"/>'+
+      '<circle cx="38" cy="54" r="24" fill="#57B36A" stroke="none"/><circle cx="82" cy="54" r="24" fill="#57B36A" stroke="none"/><circle cx="60" cy="34" r="28" fill="#57B36A" stroke="none"/>'+
+      '<circle cx="42" cy="56" r="6" fill="#D93A4A" stroke-width="3"/><circle cx="74" cy="38" r="6" fill="#D93A4A" stroke-width="3"/><circle cx="84" cy="64" r="6" fill="#D93A4A" stroke-width="3"/>');}
+  };
+  var GO_ICON='<svg viewBox="0 0 120 120" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><circle cx="60" cy="26" r="13" fill="currentColor"/><path d="M60 46 V80 M60 54 L32 34 M60 54 L88 34 M60 80 L40 108 M60 80 L80 108"/></g></svg>';
+  var STOP_ICON='<svg viewBox="0 0 120 120" aria-hidden="true" focusable="false"><rect x="28" y="28" width="64" height="64" rx="12" fill="currentColor"/></svg>';
+
+  /* 움직임: t(초), W(무대 너비), S(캐릭터 크기) → 위치와 모양 */
+  var PI=Math.PI, sin=Math.sin;
+  function wrap(d,W,S){var span=W+S;return -S+((d%span)+span)%span;}
+  function startAt(W,S){return S+W*.06;}
+  var MOVE={
+    /* 폴짝폴짝: 웅크렸다가 높이, 멀리 */
+    frog:function(t,W,S){
+      var T=1.15,d=W*.2,H=S*.6,n=Math.floor(t/T),u=t/T-n,y=0,sx=1,sy=1,a=0,k;
+      if(u<.22){k=u/.22;sy=1-.24*sin(k*PI);sx=1+.16*sin(k*PI);}
+      else if(u<.82){k=(u-.22)/.6;y=-H*4*k*(1-k);a=k;sy=1+.1*sin(k*PI);sx=1-.07*sin(k*PI);}
+      else{k=(u-.82)/.18;a=1;sy=1-.2*sin(k*PI);sx=1+.14*sin(k*PI);}
+      return{x:wrap(startAt(W,S)+(n+a)*d,W,S),y:y,sx:sx,sy:sy,r:0};},
+    /* 깡충깡충: 낮고 빠르게 연달아 */
+    rabbit:function(t,W,S){
+      var T=.52,d=W*.075,H=S*.34,n=Math.floor(t/T),u=t/T-n,y=0,sx=1,sy=1,a=1,r=0,k;
+      if(u<.72){k=u/.72;y=-H*4*k*(1-k);a=k;r=-7*sin(k*PI);}
+      else{k=(u-.72)/.28;sy=1-.1*sin(k*PI);sx=1+.07*sin(k*PI);}
+      return{x:wrap(startAt(W,S)+(n+a)*d,W,S),y:y,sx:sx,sy:sy,r:r};},
+    /* 엉금엉금: 아주 느리게, 조금씩 밀며 */
+    turtle:function(t,W,S){
+      var w=2*PI/1.8;
+      return{x:wrap(startAt(W,S)+W*.035*t+W*.008*sin(w*t),W,S),y:0,sx:1,sy:1,r:2*sin(w*t)};},
+    /* 살금살금: 한 발 살짝, 그리고 멈춤 */
+    cat:function(t,W,S){
+      var T=1.3,d=W*.055,n=Math.floor(t/T),u=t/T-n,a=1,y=0,k;
+      if(u<.4){k=u/.4;a=k*k*(3-2*k);y=-S*.04*sin(k*PI);}
+      return{x:wrap(startAt(W,S)+(n+a)*d,W,S),y:y,sx:1.04,sy:.9,r:0};},
+    /* 뒤뚱뒤뚱: 좌우로 기우뚱 */
+    penguin:function(t,W,S){
+      var w=2*PI/1;
+      return{x:wrap(startAt(W,S)+W*.06*t,W,S),y:-S*.03*Math.abs(sin(w*t)),sx:1,sy:1,r:12*sin(w*t)};},
+    /* 데굴데굴: 굴러간 거리만큼 돈다 */
+    ball:function(t,W,S){
+      var d=W*.22*t;
+      return{x:wrap(startAt(W,S)+d,W,S),y:0,sx:1,sy:1,r:d/(S/2)*180/PI};},
+    /* 빙글빙글: 제자리에서 돌며 살짝 맴돈다 */
+    top:function(t,W,S){
+      return{x:(W-S)/2+W*.14*sin(2*PI*t/3.2),y:0,sx:1,sy:1,r:7*sin(2*PI*t/.8)};},
+    /* 흔들흔들: 뿌리는 그대로, 천천히 */
+    tree:function(t,W,S){
+      return{x:(W-S)/2,y:0,sx:1,sy:1,r:9*sin(2*PI*t/2.6)};}
+  };
+
+  var CH=[
+    {id:'frog',word:'폴짝폴짝',line:'개구리가 폴짝폴짝 뛰어요',follow:'개구리처럼 폴짝폴짝, 따라 해 보자!',size:1,origin:'50% 100%',voice:{rate:1,pitch:1.3}},
+    {id:'rabbit',word:'깡충깡충',line:'토끼가 깡충깡충 뛰어요',follow:'토끼처럼 깡충깡충, 따라 해 보자!',size:1,origin:'50% 100%',voice:{rate:1.25,pitch:1.5}},
+    {id:'turtle',word:'엉금엉금',line:'거북이가 엉금엉금 기어가요',follow:'거북이처럼 엉금엉금, 따라 해 보자!',size:1,origin:'50% 100%',voice:{rate:.55,pitch:.7}},
+    {id:'cat',word:'살금살금',line:'고양이가 살금살금 걸어가요',follow:'고양이처럼 살금살금, 따라 해 보자!',size:1,origin:'50% 100%',voice:{rate:.75,pitch:1,volume:.5}},
+    {id:'penguin',word:'뒤뚱뒤뚱',line:'펭귄이 뒤뚱뒤뚱 걸어요',follow:'펭귄처럼 뒤뚱뒤뚱, 따라 해 보자!',size:1.05,origin:'50% 100%',voice:{rate:.85,pitch:.9}},
+    {id:'ball',word:'데굴데굴',line:'공이 데굴데굴 굴러가요',follow:'공처럼 데굴데굴, 따라 해 보자!',size:.8,origin:'50% 50%',voice:{rate:1.1,pitch:1.1}},
+    {id:'top',word:'빙글빙글',line:'팽이가 빙글빙글 돌아요',follow:'팽이처럼 빙글빙글, 따라 해 보자!',size:1,origin:'50% 100%',voice:{rate:1.2,pitch:1.3}},
+    {id:'tree',word:'흔들흔들',line:'나무가 흔들흔들 흔들려요',follow:'나무처럼 흔들흔들, 따라 해 보자!',size:1.25,origin:'50% 100%',voice:{rate:.7,pitch:1}}
+  ];
+
+  var stage=document.getElementById('stage'), actor=document.getElementById('actor'), shadow=document.getElementById('shadow'),
+      wordEl=document.getElementById('word'), caption=document.getElementById('caption'), dock=document.getElementById('dock'),
+      soundBtn=document.getElementById('sound'), fullBtn=document.getElementById('full');
+  var reduced=false;
+  try{reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
+
+  var cur=0, W=0, H=0, base=0, t0=0, raf=0, running=false, following=false, followTimer=0;
+
+  /* 버튼 줄 만들기 */
+  var followBtn=document.createElement('button');
+  followBtn.type='button';followBtn.className='btn follow';followBtn.id='follow';
+  followBtn.setAttribute('aria-pressed','false');
+  followBtn.innerHTML=GO_ICON+'<span>따라 해 보자</span>';
+  dock.appendChild(followBtn);
+  var buttons=CH.map(function(c,i){
+    var b=document.createElement('button');
+    b.type='button';b.className='btn';b.id='word-'+c.id;b.setAttribute('aria-pressed','false');
+    b.innerHTML=ART[c.id]()+'<span>'+c.word+'</span>';
+    b.addEventListener('click',function(){ if(following) setFollow(false); keepAwake(); show(i,true); });
+    dock.appendChild(b);
+    return b;
+  });
+
+  function measure(){
+    W=stage.clientWidth; H=stage.clientHeight;
+    stage.style.setProperty('--sh',H+'px');
+    base=Math.min(H*.34,W*.3);
+    var S=base*CH[cur].size;
+    actor.style.width=actor.style.height=S+'px';
+    shadow.style.width=(S*.7)+'px'; shadow.style.height=(S*.09)+'px';
+    if(!running) pose(null);
+  }
+  function pose(p){
+    var S=base*CH[cur].size;
+    if(!p) p={x:(W-S)/2,y:0,sx:1,sy:1,r:0};
+    actor.style.transform='translate3d('+p.x+'px,'+p.y+'px,0) rotate('+p.r+'deg) scale('+p.sx+','+p.sy+')';
+    var k=1-Math.min(.5,-p.y/S);
+    shadow.style.transform='translate3d('+(p.x+S*.15)+'px,0,0) scale('+k+')';
+  }
+  function frame(now){
+    var c=CH[cur];
+    pose(MOVE[c.id]((now-t0)/1000,W,base*c.size));
+    raf=requestAnimationFrame(frame);
+  }
+  function run(){ if(running) return; running=true; stage.classList.remove('still'); raf=requestAnimationFrame(frame); }
+
+  function show(i,byTouch){
+    cur=i; var c=CH[i];
+    actor.innerHTML=ART[c.id]();
+    actor.style.transformOrigin=c.origin;
+    wordEl.innerHTML=c.word.split('').map(function(ch,k){return '<span style="--i:'+k+'" aria-hidden="true">'+ch+'</span>';}).join('');
+    wordEl.setAttribute('data-move',c.id); wordEl.setAttribute('aria-label',c.word);
+    caption.textContent=following?c.follow:c.line;
+    buttons.forEach(function(b,k){b.setAttribute('aria-pressed',k===i?'true':'false');});
+    t0=performance.now();
+    measure();
+    if(byTouch){ run(); say(c); }
+  }
+
+  /* 따라 해 보자: 무작위로 하나씩, 따라 할 시간을 주고 다음으로 */
+  function nextRandom(){
+    var i; do{ i=Math.floor(Math.random()*CH.length); }while(i===cur);
+    show(i,true);
+    followTimer=setTimeout(nextRandom,9000);
+  }
+  function setFollow(on){
+    following=on; clearTimeout(followTimer);
+    followBtn.setAttribute('aria-pressed',on?'true':'false');
+    followBtn.innerHTML=on?STOP_ICON+'<span>그만하기</span>':GO_ICON+'<span>따라 해 보자</span>';
+    if(on) nextRandom(); else caption.textContent=CH[cur].line;
+  }
+  followBtn.addEventListener('click',function(){ keepAwake(); setFollow(!following); });
+
+  /* 한국어 음성: 말의 느낌에 맞춰 빠르기와 높이를 바꾼다 */
+  var synth=('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window)?window.speechSynthesis:null;
+  var soundOn=true, sayToken=0, sayTimer=0, lastUtter=null;
+  function koVoice(){ try{ var v=synth.getVoices(); for(var i=0;i<v.length;i++) if(/^ko/i.test(v[i].lang)) return v[i]; }catch(e){} return null; }
+  function say(c){
+    clearTimeout(sayTimer); var tk=++sayToken;
+    if(!synth||!soundOn) return;
+    try{
+      synth.cancel();
+      var u=new SpeechSynthesisUtterance(c.word), v=koVoice();
+      u.lang='ko-KR'; if(v) u.voice=v;
+      u.rate=c.voice.rate; u.pitch=c.voice.pitch; u.volume=c.voice.volume||1;
+      u.onend=function(){ if(tk===sayToken&&soundOn) sayTimer=setTimeout(function(){ if(tk===sayToken) say(c); },1500); };
+      lastUtter=u; synth.speak(u);
+    }catch(e){}
+  }
+  if(synth){
+    try{ synth.getVoices(); }catch(e){}
+    soundBtn.addEventListener('click',function(){
+      soundOn=!soundOn;
+      soundBtn.setAttribute('aria-pressed',soundOn?'true':'false');
+      soundBtn.textContent=soundOn?'소리 켜짐':'소리 꺼짐';
+      if(soundOn){ if(running) say(CH[cur]); }
+      else{ sayToken++; clearTimeout(sayTimer); try{synth.cancel();}catch(e){} }
+    });
+  }else{
+    soundBtn.disabled=true; soundBtn.setAttribute('aria-pressed','false');
+    soundBtn.textContent='이 기기는 음성 읽기가 안 돼요';
+  }
+
+  /* 전체 화면 */
+  var root=document.documentElement;
+  if(!(document.fullscreenEnabled&&root.requestFullscreen)){ fullBtn.hidden=true; }
+  else{
+    fullBtn.addEventListener('click',function(){
+      var p;
+      try{ p=document.fullscreenElement?document.exitFullscreen():root.requestFullscreen(); }catch(e){ p=Promise.reject(e); }
+      if(p&&p.catch) p.catch(function(){ fullBtn.disabled=true; fullBtn.textContent='이 화면에서는 전체 화면이 안 돼요'; });
+    });
+    document.addEventListener('fullscreenchange',function(){
+      fullBtn.textContent=document.fullscreenElement?'전체 화면 끄기':'전체 화면';
+    });
+  }
+
+  /* 놀이하는 동안 화면이 꺼지지 않게 */
+  var lock=null;
+  function keepAwake(){
+    if(lock||!navigator.wakeLock) return;
+    try{ navigator.wakeLock.request('screen').then(function(l){ lock=l; l.addEventListener('release',function(){lock=null;}); }).catch(function(){}); }catch(e){}
+  }
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){ sayToken++; clearTimeout(sayTimer); try{ if(synth) synth.cancel(); }catch(e){} }
+    else if(running){ keepAwake(); say(CH[cur]); }
+  });
+
+  if(window.ResizeObserver) new ResizeObserver(measure).observe(stage);
+  else window.addEventListener('resize',measure);
+
+  /* 처음 화면: 개구리가 이미 뛰고 있다 (소리는 누른 뒤부터) */
+  if(reduced) stage.classList.add('still');
+  show(0,false);
+  if(!reduced) run();
+})();
+</script>
+
+</body></html>
